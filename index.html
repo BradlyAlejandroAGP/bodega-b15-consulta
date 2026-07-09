@@ -414,7 +414,12 @@ async function loadFileFromSharePoint() {
     processExcelBuffer(buffer);
   } catch(e) {
     console.error(e);
-    setLoading('Error al leer el archivo: ' + e.message);
+    let msg = e.message || '';
+    let userMsg = 'Error al leer el archivo: ' + msg;
+    if (msg.includes('could not be found') || msg.includes('not found') || msg.includes('403') || msg.includes('Forbidden') || msg.includes('Access')) {
+      userMsg = 'Sin acceso al archivo Bodega B15.xlsm en SharePoint. Solicita acceso al equipo de Supply Chain (Col_Sglass_Supply_Chain → 5. Despachos → Bodega B15.xlsm).';
+    }
+    setLoading(userMsg);
     document.getElementById('loginBtn').style.display = 'inline-flex';
     document.getElementById('loginBtn').textContent = 'Reintentar';
   }
