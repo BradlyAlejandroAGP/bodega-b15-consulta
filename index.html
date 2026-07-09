@@ -312,13 +312,12 @@ const MSAL_CONFIG = {
   auth: {
     clientId: 'd5991ae2-bfad-4c82-a40f-ce9ef5819909',
     authority: 'https://login.microsoftonline.com/10f1df46-3600-406b-8233-aa54d28fe447',
-    redirectUri: window.location.href.split('?')[0]
+    redirectUri: 'https://happy-glacier-08e75ce0f.7.azurestaticapps.net'
   },
   cache: { cacheLocation: 'sessionStorage', storeAuthStateInCookie: false }
 };
 const GRAPH_SCOPES = ['Files.Read.All', 'Sites.Read.All', 'User.Read'];
 // FILE_PATH resolved dynamically via Graph API
-  
 
 let msalInstance = null;
 let currentAccount = null;
@@ -382,31 +381,36 @@ async function getToken() {
 async function loadFileFromSharePoint() {
   try {
     setLoading('Buscando Bodega B15.xlsm en SharePoint...');
+    const token = await getToken();
+    const headers = { Authorization: 'Bearer ' + token };
+
+    setLoading('Conectando al sitio de SharePoint...');
     const siteResp = await fetch(
       'https://graph.microsoft.com/v1.0/sites/agpglass.sharepoint.com:/sites/Col_Sglass_Supply_Chain',
-      { headers: { Authorization: 'Bearer ' + token } }
+      { headers: headers }
     );
     const siteData = await siteResp.json();
-    if (!siteResp.ok) throw new Error('Site: ' + (siteData.error?.message || siteResp.status));
-      const siteId = siteData.id;
-      setLoading('Accediendo a la biblioteca de documentos...');
-      const driveResp = await fetch(
-      `https://graph.microsoft.com/v1.0/sites/${siteId}/drives`,
-      { headers: { Authorization: 'Bearer ' + token } }
+    if (!siteResp.ok) throw new Error('Sitio: ' + (siteData.error ? siteData.error.message : siteResp.status));
+    const siteId = siteData.id;
+
+    setLoading('Accediendo a la biblioteca de documentos...');
+    const driveResp = await fetch(
+      'https://graph.microsoft.com/v1.0/sites/' + siteId + '/drives',
+      { headers: headers }
     );
     const driveData = await driveResp.json();
-    const drive = driveData.value.find(d => d.name === 'Documents' || d.name === 'Documentos');
-    if (!drive) throw new Error('No se encontró la biblioteca de documentos');
-      setLoading('Buscando Bodega B15.xlsm...');
-      const url = `https://graph.microsoft.com/v1.0/sites/${siteId}/drives/${drive.id}/root:/5. Despachos/Bodega B15.xlsm:/content`;
-      const resp = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
-      const resp = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
-    if (!resp.ok) {
-      const err = await resp.json().catch(() => ({}));
-      throw new Error('Graph API: ' + (err.error?.message || resp.status));
+    const drive = driveData.value.find(function(d){ return d.name === 'Documents' || d.name === 'Documentos'; });
+    if (!drive) throw new Error('No se encontro la biblioteca de documentos. Drives disponibles: ' + driveData.value.map(function(d){return d.name;}).join(', '));
+
+    setLoading('Buscando Bodega B15.xlsm...');
+    const fileUrl = 'https://graph.microsoft.com/v1.0/sites/' + siteId + '/drives/' + drive.id + '/root:/5. Despachos/Bodega B15.xlsm:/content';
+    const fileResp = await fetch(fileUrl, { headers: headers });
+    if (!fileResp.ok) {
+      const err = await fileResp.json().catch(function(){ return {}; });
+      throw new Error('Archivo: ' + (err.error ? err.error.message : fileResp.status));
     }
     setLoading('Archivo descargado — procesando datos...');
-    const buffer = await resp.arrayBuffer();
+    const buffer = await fileResp.arrayBuffer();
     processExcelBuffer(buffer);
   } catch(e) {
     console.error(e);
