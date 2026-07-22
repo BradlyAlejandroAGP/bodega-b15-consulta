@@ -151,7 +151,7 @@
       <div class="label">Última actualización archivo B15</div>
       <div class="date-main" id="lastUpdateDate">Sin fecha</div>
       <div class="age-main" id="lastUpdateAge">Carga el archivo</div>
-      <div class="date-sub">Tomado de INVENTARIO_ACTIVO!E3 · se recalcula cada minuto en pantalla</div>
+      <div class="date-sub">Tomado de INVENTARIO_ACTIVO!E3 · se verifica cada minuto contra SharePoint</div>
     </div>
 
     <div class="section-label">Indicadores</div>
@@ -329,6 +329,7 @@ const GRAPH_SCOPES = ['Files.Read.All', 'Sites.Read.All', 'User.Read'];
 
 let msalInstance = null;
 let currentAccount = null;
+let cachedFileUrl = null;
 
 async function initMSAL() {
   msalInstance = new msal.PublicClientApplication(MSAL_CONFIG);
@@ -412,6 +413,7 @@ async function loadFileFromSharePoint() {
 
     setLoading('Buscando Bodega B15.xlsm...');
     const fileUrl = 'https://graph.microsoft.com/v1.0/sites/' + siteId + '/drives/' + drive.id + '/root:/5. Despachos/Bodega B15.xlsm:/content';
+    cachedFileUrl = fileUrl;
     const fileResp = await fetch(fileUrl, { headers: headers });
     if (!fileResp.ok) {
       const err = await fileResp.json().catch(function(){ return {}; });
@@ -430,6 +432,29 @@ async function loadFileFromSharePoint() {
     setLoading(userMsg);
     document.getElementById('loginBtn').style.display = 'inline-flex';
     document.getElementById('loginBtn').textContent = 'Reintentar';
+  }
+}
+
+async function pollForFileUpdate() {
+  if (!currentAccount || !cachedFileUrl) { updateLastRefreshDisplay(); return; }
+  try {
+    const token = await getToken();
+    const fileResp = await fetch(cachedFileUrl, { headers: { Authorization: 'Bearer ' + token } });
+    if (!fileResp.ok) { updateLastRefreshDisplay(); return; }
+    const buffer = await fileResp.arrayBuffer();
+    const wb = XLSX.read(new Uint8Array(buffer), { type: 'array', cellDates: true });
+    const invSheet = findSheetName(wb, 'INVENTARIO_ACTIVO', 'INVENTARIO');
+    const nuevaFecha = invSheet ? readCellDate(wb.Sheets[invSheet], 'E3') : null;
+    const cambio = (nuevaFecha instanceof Date && !isNaN(nuevaFecha)) &&
+      (!(ultimaActualizacionArchivo instanceof Date) || nuevaFecha.getTime() !== ultimaActualizacionArchivo.getTime());
+    if (cambio) {
+      processExcelBuffer(buffer);
+    } else {
+      updateLastRefreshDisplay();
+    }
+  } catch(e) {
+    console.error('Verificacion de actualizacion fallida:', e);
+    updateLastRefreshDisplay();
   }
 }
 
@@ -567,7 +592,7 @@ function processExcelBuffer(buffer){
     ultimaActualizacionArchivo=readCellDate(wb.Sheets[invSheet],'E3');
     updateLastRefreshDisplay();
     if(lastUpdateTimer)clearInterval(lastUpdateTimer);
-    lastUpdateTimer=setInterval(updateLastRefreshDisplay,60000);
+    lastUpdateTimer=setInterval(pollForFileUpdate,60000);
     const factSheet=findSheetName(wb,'CALENDARIO_FACTURADO','FACTURADO');
     facturadoRows=factSheet?parseRowsFromSheet(wb,factSheet,c=>c==='Cliente').rows:[];
     processData();
