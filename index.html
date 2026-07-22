@@ -39,6 +39,14 @@
   .loading-msg{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:14px;}
   .section-label{font-family:var(--mono);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--amber);margin:28px 0 12px;display:flex;align-items:center;gap:10px;}
   .section-label::after{content:'';flex:1;height:1px;background:var(--line);}
+  .date-card{background:linear-gradient(180deg,#232833,#1b1f27);border:1px solid var(--line);border-radius:12px;padding:18px 22px;position:relative;overflow:hidden;margin-bottom:18px;}
+  .date-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at top right,rgba(245,166,35,.10),transparent 40%);pointer-events:none;}
+  .date-card .label{font-size:11px;color:var(--amber);text-transform:uppercase;letter-spacing:1.1px;font-family:var(--mono);position:relative;z-index:1;}
+  .date-card .date-main{font-family:var(--disp);font-size:30px;font-weight:800;line-height:1.05;color:var(--text);margin-top:6px;position:relative;z-index:1;}
+  .date-card .age-main{font-family:var(--mono);font-size:13px;color:var(--green);margin-top:6px;position:relative;z-index:1;}
+  .date-card.stale .age-main{color:var(--amber);}
+  .date-card.missing .age-main{color:var(--red);}
+  .date-card .date-sub{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:6px;position:relative;z-index:1;}
   .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
   .kpi{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:18px 20px;position:relative;overflow:hidden;}
   .kpi::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--amber);}
@@ -51,18 +59,17 @@
   .tab-content{display:none;}
   .tab-content.active{display:block;}
   .occ-card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:20px 22px;}
-  .g-row{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);}
-  .g-row:last-of-type{border-bottom:none;padding-bottom:0;}
-  .g-row:first-of-type{padding-top:0;}
-  .g-meta{width:210px;flex-shrink:0;}
-  .g-name{font-size:14px;font-weight:600;color:var(--text);}
-  .g-sub{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:3px;}
-  .g-track{flex:1;height:20px;background:var(--surface-2);border-radius:10px;overflow:hidden;border:1px solid var(--line);}
-  .g-fill{height:100%;border-radius:10px;transition:width .45s ease;}
-  .g-pct{width:68px;text-align:right;font-family:var(--mono);font-weight:700;font-size:15px;flex-shrink:0;}
+  .occ-gauge-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .gauge-kpi{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
+  .kpi-ring{--pct:0;--ring-color:var(--green);width:92px;height:92px;border-radius:50%;background:conic-gradient(var(--ring-color) calc(var(--pct)*1%),rgba(255,255,255,.08) 0);display:grid;place-items:center;position:relative;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);}
+  .kpi-ring::after{content:'';position:absolute;inset:8px;border-radius:50%;background:var(--surface-2);border:1px solid rgba(255,255,255,.08);}
+  .kpi-ring-inner{position:relative;z-index:1;text-align:center;}
+  .kpi-ring-inner span{display:block;font-family:var(--disp);font-size:21px;font-weight:800;line-height:1;color:var(--text);}
+  .g-name{font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:6px;}
+  .g-sub{font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;line-height:1.4;}
   .info-btn{width:22px;height:22px;border-radius:50%;border:1px solid var(--line);background:transparent;font-family:var(--mono);font-size:11px;color:var(--muted);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
   .info-btn:hover{border-color:var(--amber);color:var(--amber);}
-  .info-box{background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:12px 14px;font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6;display:none;}
+  .info-box{background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:12px 14px;font-size:12px;color:var(--muted);margin-top:14px;line-height:1.6;display:none;}
   .info-box strong{color:var(--text);}
   .occ-footer{display:flex;align-items:center;gap:8px;margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);font-family:var(--mono);font-size:11px;color:var(--muted);}
   .occ-footer input{width:70px;background:var(--surface-2);border:1px solid var(--line);color:var(--amber);font-family:var(--mono);font-size:12px;padding:4px 6px;border-radius:4px;}
@@ -104,7 +111,7 @@
   .qty-select-wrap{display:grid;grid-template-columns:260px 1fr;gap:12px;align-items:end;margin-bottom:14px;}
   .fact-kpi-row{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:14px;}
   footer{text-align:center;color:var(--muted);font-size:11px;font-family:var(--mono);padding:40px 0 20px;}
-  @media(max-width:900px){.kpi-row{grid-template-columns:repeat(2,1fr);}.grid-2{grid-template-columns:1fr;}.manual-grid{grid-template-columns:1fr 1fr;}.manual-compare{grid-template-columns:1fr;}}
+  @media(max-width:900px){.kpi-row{grid-template-columns:repeat(2,1fr);}.grid-2{grid-template-columns:1fr;}.manual-grid{grid-template-columns:1fr 1fr;}.manual-compare{grid-template-columns:1fr;}.occ-gauge-row{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -140,10 +147,17 @@
 
   <div id="content" style="display:none;">
 
+    <div class="date-card missing" id="updateStatus">
+      <div class="label">Última actualización archivo B15</div>
+      <div class="date-main" id="lastUpdateDate">Sin fecha</div>
+      <div class="age-main" id="lastUpdateAge">Carga el archivo</div>
+      <div class="date-sub">Tomado de INVENTARIO_ACTIVO!E3 · se recalcula cada minuto en pantalla</div>
+    </div>
+
     <div class="section-label">Indicadores</div>
     <div class="kpi-row">
       <div class="kpi"><div class="label">Piezas en B15</div><div class="value" id="kpiPiezas">0</div><div class="sub">UltimoAlmacen = IM03</div></div>
-      <div class="kpi"><div class="label">Cajas / HU</div><div class="value" id="kpiCajas">0</div><div class="sub">Cajas en racks</div></div>
+      <div class="kpi"><div class="label">Cajas / HU</div><div class="value" id="kpiCajas">0</div><div class="sub" id="kpiCajasSub">Cajas en racks</div></div>
       <div class="kpi"><div class="label">Facturado sin despachar</div><div class="value" id="kpiFacturado">0</div><div class="sub" id="kpiFacturadoSub">Cajas sin despachar</div></div>
       <div class="kpi"><div class="label">Valor total inventario</div><div class="value" id="kpiValor" style="font-size:28px;">$0</div><div class="sub">Suma PrecioGenesisTotal</div></div>
     </div>
@@ -157,34 +171,28 @@
 
       <div class="section-label">Estado de ocupación</div>
       <div class="occ-card">
-        <div class="g-row">
-          <div class="g-meta">
-            <div class="g-name">Estado bodega</div>
+        <div class="occ-gauge-row">
+          <div class="gauge-kpi">
+            <div class="kpi-ring" id="cajasRing"><div class="kpi-ring-inner"><span id="cajasPct">0%</span></div></div>
+            <div class="g-name">Estado bodega
+              <button class="info-btn" onclick="var b=document.getElementById('info847');b.style.display=b.style.display==='block'?'none':'block'" title="¿Cómo se calcula?">?</button>
+            </div>
             <div class="g-sub" id="cajasSubtxt">— de 882 cajas</div>
           </div>
-          <div class="g-track"><div class="g-fill" id="cajasFill" style="width:0%"></div></div>
-          <div class="g-pct" id="cajasPct">—</div>
-          <button class="info-btn" onclick="var b=document.getElementById('info847');b.style.display=b.style.display==='block'?'none':'block'" title="¿Cómo se calcula?">?</button>
-        </div>
-        <div class="info-box" id="info847">
-          <strong>¿Cómo se calcula Estado bodega?</strong><br>
-          Toma las <strong>cajas en racks</strong> (HU distintos × 1.4, factor del archivo de referencia pendiente de verificación con el área de bodega) más las <strong>cajas sin despachar</strong> (CALENDARIO_FACTURADO), dividido entre la capacidad fija de <strong>882 cajas</strong>.
-        </div>
-        <div class="g-row">
-          <div class="g-meta">
+          <div class="gauge-kpi">
+            <div class="kpi-ring" id="racksRing1"><div class="kpi-ring-inner"><span id="racksPct1">0%</span></div></div>
             <div class="g-name">Estado racks</div>
             <div class="g-sub" id="racksSubtxt1">— de 1.652 piezas</div>
           </div>
-          <div class="g-track"><div class="g-fill" id="racksFill1" style="width:0%"></div></div>
-          <div class="g-pct" id="racksPct1">—</div>
-        </div>
-        <div class="g-row">
-          <div class="g-meta">
+          <div class="gauge-kpi">
+            <div class="kpi-ring" id="racksRing2"><div class="kpi-ring-inner"><span id="racksPct2">0%</span></div></div>
             <div class="g-name">Estado bodega despachos</div>
             <div class="g-sub" id="racksSubtxt2">— de 5.180 piezas</div>
           </div>
-          <div class="g-track"><div class="g-fill" id="racksFill2" style="width:0%"></div></div>
-          <div class="g-pct" id="racksPct2">—</div>
+        </div>
+        <div class="info-box" id="info847">
+          <strong>¿Cómo se calcula Estado bodega?</strong><br>
+          Toma las <strong>cajas / HU</strong> desde <strong>INVENTARIO_ACTIVO!E2</strong> (cálculo realizado por Excel) más las <strong>cajas sin despachar</strong> (CALENDARIO_FACTURADO), dividido entre la capacidad fija de <strong>882 cajas</strong>.
         </div>
         <div class="occ-footer">
           Capacidad racks declarada: <input type="number" id="capRacks" value="1652"> piezas
@@ -433,9 +441,8 @@ function setLoading(msg) {
 // ─── CONSTANTES Y DATOS ───────────────────────────────────────────────────────
 const KEY_COLS=['UltimoAlmacen','Lote','HU','NombreClienteOrigen','PrecioGenesisTotal','MaterialEmbalaje','Meses_Antiguedad','Material','PIEZA','Centro'];
 const CAP_CAJAS_FIXED=882;
-const FACTOR_OCUPACION_CAJA=1.4;
 let rawRows=[],b15Rows=[],facturadoRows=[],facturadoClienteRows=[];
-let facturadoCajasTotal=0,currentCajasCount=0,syncingManual=false;
+let facturadoCajasTotal=0,currentCajasCount=0,excelCajasHU=null,ultimaActualizacionArchivo=null,lastUpdateTimer=null,syncingManual=false;
 
 document.querySelectorAll('.tab-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
@@ -451,7 +458,7 @@ function toggleManual(){
   document.getElementById('manualPanel').classList.toggle('open');
 }
 
-function normText(v){return String(v||'').trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();}
+function normText(v){return String(v||'').trim().normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase();}
 function escapeHtml(v){return String(v??'').replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));}
 function num(v){if(v===null||v===undefined||v==='')return null;if(typeof v==='number')return Number.isFinite(v)?v:null;const n=Number(String(v).replace(/[$\s]/g,'').replace(/,/g,''));return Number.isFinite(n)?n:null;}
 function fmtInt(n){return Number(n||0).toLocaleString('es-CO',{maximumFractionDigits:0});}
@@ -461,6 +468,73 @@ function fmtSigned(n,fmt){return(Number(n)>0?'+':'')+fmt(n);}
 function parseUserNumber(s){s=String(s??'').trim().replace(/[^0-9,.]/g,'').replace(',','.');const n=Number(s);return Number.isFinite(n)?n:0;}
 function inputNumber(id){return parseUserNumber(document.getElementById(id).value);}
 function gColor(pct){return pct>1?'var(--red)':(pct>0.85?'var(--amber)':'var(--green)');}
+function readCell(ws,addr){return ws&&ws[addr]?ws[addr]:null;}
+function readCellNumber(ws,addr){
+  const c=readCell(ws,addr);
+  if(!c)return null;
+  const n=num(c.v);
+  return Number.isFinite(n)?n:null;
+}
+function parseDateText(v){
+  if(v===null||v===undefined||v==='')return null;
+  if(v instanceof Date&&!isNaN(v))return v;
+  const txt=String(v).trim();
+  const m=txt.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if(m){
+    let y=Number(m[3]); if(y<100)y+=2000;
+    const d=new Date(y,Number(m[2])-1,Number(m[1]),Number(m[4]||0),Number(m[5]||0),Number(m[6]||0));
+    return isNaN(d)?null:d;
+  }
+  const d=new Date(txt);
+  return isNaN(d)?null:d;
+}
+function readCellDate(ws,addr){
+  const c=readCell(ws,addr);
+  if(!c)return null;
+  if(c.v instanceof Date&&!isNaN(c.v))return c.v;
+  if(typeof c.v==='number'&&XLSX&&XLSX.SSF){
+    const p=XLSX.SSF.parse_date_code(c.v);
+    if(p)return new Date(p.y,p.m-1,p.d,p.H||0,p.M||0,Math.floor(p.S||0));
+  }
+  return parseDateText(c.w||c.v);
+}
+function fmtDateTime(d){
+  if(!(d instanceof Date)||isNaN(d))return 'Sin fecha';
+  return d.toLocaleString('es-CO',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+function ageText(d){
+  if(!(d instanceof Date)||isNaN(d))return 'Fecha no encontrada';
+  const diffMs=Date.now()-d.getTime();
+  if(diffMs<0)return 'fecha futura';
+  const mins=Math.floor(diffMs/60000);
+  if(mins<1)return 'actualizado hace menos de 1 min';
+  if(mins<60)return 'actualizado hace '+mins+' min';
+  const hrs=Math.floor(mins/60);
+  if(hrs<24)return 'actualizado hace '+hrs+' h '+(mins%60)+' min';
+  const days=Math.floor(hrs/24);
+  return 'actualizado hace '+days+' d '+(hrs%24)+' h';
+}
+function updateLastRefreshDisplay(){
+  const box=document.getElementById('updateStatus');
+  const dateEl=document.getElementById('lastUpdateDate');
+  const ageEl=document.getElementById('lastUpdateAge');
+  if(!box||!dateEl||!ageEl)return;
+  dateEl.textContent=fmtDateTime(ultimaActualizacionArchivo);
+  ageEl.textContent=ageText(ultimaActualizacionArchivo);
+  box.classList.remove('missing','stale');
+  if(!(ultimaActualizacionArchivo instanceof Date)||isNaN(ultimaActualizacionArchivo)){box.classList.add('missing');return;}
+  const hours=(Date.now()-ultimaActualizacionArchivo.getTime())/3600000;
+  if(hours>24)box.classList.add('stale');
+}
+function setGauge(ringId,pctId,pct){
+  const ring=document.getElementById(ringId);
+  const txt=document.getElementById(pctId);
+  const safe=Number.isFinite(pct)?Math.max(0,pct):0;
+  const shown=Math.min(safe*100,100);
+  const color=gColor(safe);
+  if(ring){ring.style.setProperty('--pct',shown.toFixed(1));ring.style.setProperty('--ring-color',color);}
+  if(txt){txt.textContent=fmtPct(safe);txt.style.color=color;}
+}
 
 function findSheetName(wb,exact,contains){
   const e=wb.SheetNames.find(n=>normText(n)===normText(exact));
@@ -489,6 +563,11 @@ function processExcelBuffer(buffer){
     const inv=parseRowsFromSheet(wb,invSheet,c=>c==='UltimoAlmacen');
     if(!inv.rows.length){setLoading('No se encontro encabezado UltimoAlmacen.');return;}
     rawRows=inv.rows;
+    excelCajasHU=readCellNumber(wb.Sheets[invSheet],'E2');
+    ultimaActualizacionArchivo=readCellDate(wb.Sheets[invSheet],'E3');
+    updateLastRefreshDisplay();
+    if(lastUpdateTimer)clearInterval(lastUpdateTimer);
+    lastUpdateTimer=setInterval(updateLastRefreshDisplay,60000);
     const factSheet=findSheetName(wb,'CALENDARIO_FACTURADO','FACTURADO');
     facturadoRows=factSheet?parseRowsFromSheet(wb,factSheet,c=>c==='Cliente').rows:[];
     processData();
@@ -507,8 +586,10 @@ function processData(){
   b15Rows=rawRows.filter(r=>String(r['UltimoAlmacen']).trim()==='IM03');
   currentCajasCount=countCajas(b15Rows);
   const valorTotal=b15Rows.reduce((s,r)=>s+(num(r['PrecioGenesisTotal'])||0),0);
+  const cajasHU=Number.isFinite(excelCajasHU)?excelCajasHU:currentCajasCount;
   document.getElementById('kpiPiezas').textContent=fmtInt(b15Rows.length);
-  document.getElementById('kpiCajas').textContent=fmtInt(currentCajasCount);
+  document.getElementById('kpiCajas').textContent=fmtInt(cajasHU);
+  document.getElementById('kpiCajasSub').textContent=Number.isFinite(excelCajasHU)?'Tomado de INVENTARIO_ACTIVO!E2':'Cajas en racks (calculado)';
   document.getElementById('kpiValor').textContent=fmtMoney(valorTotal);
   buildFacturadoTable();
   updateOcupacion();
@@ -522,33 +603,27 @@ function updateOcupacion(){
   const capCajas=CAP_CAJAS_FIXED;
   const capRacks=inputNumber('capRacks')||1;
   const cajasCount=currentCajasCount;
+  const cajasHU=Number.isFinite(excelCajasHU)?excelCajasHU:cajasCount;
   const piezasCount=b15Rows.length;
-  const cajasConFactor=Math.round(cajasCount*FACTOR_OCUPACION_CAJA);
-  const totalCajas=cajasConFactor+facturadoCajasTotal;
+  const totalCajas=cajasHU+facturadoCajasTotal;
   const pctCajas=totalCajas/capCajas;
-  document.getElementById('cajasSubtxt').textContent=fmtInt(cajasConFactor)+' racks + '+fmtInt(facturadoCajasTotal)+' sin despachar = '+fmtInt(totalCajas)+' de '+fmtInt(capCajas)+' cajas';
-  document.getElementById('cajasFill').style.width=Math.min(pctCajas*100,100)+'%';
-  document.getElementById('cajasFill').style.background=gColor(pctCajas);
-  document.getElementById('cajasPct').textContent=fmtPct(pctCajas);
-  document.getElementById('cajasPct').style.color=gColor(pctCajas);
+  document.getElementById('cajasSubtxt').textContent=fmtInt(cajasHU)+' racks + '+fmtInt(facturadoCajasTotal)+' sin despachar = '+fmtInt(totalCajas)+' de '+fmtInt(capCajas)+' cajas';
+  setGauge('cajasRing','cajasPct',pctCajas);
+
   const pctR1=piezasCount/capRacks;
   document.getElementById('racksSubtxt1').textContent=fmtInt(piezasCount)+' de '+fmtInt(capRacks)+' piezas';
-  document.getElementById('racksFill1').style.width=Math.min(pctR1*100,100)+'%';
-  document.getElementById('racksFill1').style.background=gColor(pctR1);
-  document.getElementById('racksPct1').textContent=fmtPct(pctR1);
-  document.getElementById('racksPct1').style.color=gColor(pctR1);
+  setGauge('racksRing1','racksPct1',pctR1);
+
   const instalada=(capCajas/2)*8+capRacks;
   const pctR2=piezasCount/instalada;
   document.getElementById('racksSubtxt2').textContent=fmtInt(piezasCount)+' de '+fmtInt(Math.round(instalada))+' piezas';
-  document.getElementById('racksFill2').style.width=Math.min(pctR2*100,100)+'%';
-  document.getElementById('racksFill2').style.background=gColor(pctR2);
-  document.getElementById('racksPct2').textContent=fmtPct(pctR2);
-  document.getElementById('racksPct2').style.color=gColor(pctR2);
+  setGauge('racksRing2','racksPct2',pctR2);
+
   const manualCajas=Math.max(0,inputNumber('manualCajas')||0);
   const pctManual=manualCajas/capCajas;
   const diff=manualCajas-totalCajas;
   document.getElementById('compareAutoPct').textContent=fmtPct(pctCajas);
-  document.getElementById('compareAutoBoxes').textContent=fmtInt(cajasConFactor)+' racks + '+fmtInt(facturadoCajasTotal)+' sin despachar';
+  document.getElementById('compareAutoBoxes').textContent=fmtInt(cajasHU)+' racks + '+fmtInt(facturadoCajasTotal)+' sin despachar';
   document.getElementById('compareManualPct').textContent=fmtPct(pctManual);
   document.getElementById('compareManualBoxes').textContent=fmtInt(manualCajas)+' cajas';
   document.getElementById('compareDiffPct').textContent=fmtSigned(diff/capCajas,fmtPct);
